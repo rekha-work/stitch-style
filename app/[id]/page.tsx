@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Scissors } from "lucide-react";
 import { useInView } from "react-intersection-observer";
-
-export default function GalleryPage({ params }: { params: { id: string } }) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export default function GalleryPage(props:any) {
+  const { params } = props
   const [allImageUrls, setAllImageUrls] = useState<string[]>([]);
   const [images, setImages] = useState<string[]>([]);
   const [page, setPage] = useState(1);
@@ -42,6 +43,7 @@ export default function GalleryPage({ params }: { params: { id: string } }) {
     if (inView && !loading && !allLoaded) {
       loadMoreImages();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inView, loading, allLoaded]);
 
   const loadMoreImages = () => {

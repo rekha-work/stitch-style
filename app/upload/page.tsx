@@ -81,6 +81,7 @@ export default function UploadPage() {
         setPassword("");
       }
     } catch (error) {
+      console.error("Error uploading image:", error);
       setToastMessage("An error occurred");
     } finally {
       setIsUploading(false);

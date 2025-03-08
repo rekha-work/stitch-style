@@ -1,8 +1,8 @@
 import { PrismaClient } from '@prisma/client';
 
 declare global {
-  
-  var prisma: PrismaClient | undefined;
+    // eslint-disable-next-line no-var
+   var prisma: PrismaClient | undefined;
 }
 // all this code iss to prevent recreating a new prisma client on every request and hot relooading in dev mode
 
