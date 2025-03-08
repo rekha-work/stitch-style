@@ -88,20 +88,19 @@ export default function GalleryPage({ params }: { params: { id: string } }) {
               >
                 <div className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 transform group-hover:scale-[1.02]">
                   <div className="relative aspect-[3/4] overflow-hidden">
-                    <Image
-                      src={imageUrl || "/placeholder.svg"}
-                      alt={`Fashion design ${index + 1}`}
-                      fill
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                      className="object-cover transition-transform duration-500 group-hover:scale-110"
-                      priority={index < 2}
-                    />
+                  <Image
+  src={imageUrl || "/placeholder.svg"}
+  alt={`Fashion design ${index + 1}`}
+  fill
+  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+  className="object-contain transition-transform duration-500 group-hover:scale-110"
+  priority={index < 2}
+/>
+
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
                   </div>
                   <div className="p-4">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-1">
-                      Design Collection {index + 1}
-                    </h3>
+                   
                     <p className="text-gray-600 text-sm">Click to view full size</p>
                   </div>
                 </div>
@@ -109,17 +108,14 @@ export default function GalleryPage({ params }: { params: { id: string } }) {
             ))}
           </div>
 
-          {/* Loading indicator */}
           {loading && (
             <div className="flex justify-center items-center py-10">
               <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-rose-500"></div>
             </div>
           )}
 
-          {/* Intersection observer target */}
           {!allLoaded && <div ref={ref} className="h-10 my-4"></div>}
 
-          {/* Empty state */}
           {images.length === 0 && !loading && (
             <div className="text-center py-20">
               <p className="text-gray-500 text-lg">No images found</p>
@@ -128,7 +124,6 @@ export default function GalleryPage({ params }: { params: { id: string } }) {
         </section>
       </main>
 
-      {/* Footer - only shown when all images are loaded */}
       {allLoaded && (
         <footer className="bg-gray-50 border-t py-8">
           <div className="container mx-auto px-4">
@@ -139,13 +134,13 @@ export default function GalleryPage({ params }: { params: { id: string } }) {
               </div>
               <div className="flex gap-6">
                 <Link
-                  href="tel:+1234567890"
+                  href="tel:+918197801800"
                   className="flex items-center gap-2 text-gray-600 hover:text-rose-500 transition-colors"
                 >
-                  <span>+123 456 7890</span>
+                  <span>+918197801800</span>
                 </Link>
                 <Link
-                  href="https://github.com/yourusername/stitch-and-style"
+                  href="https://github.com/Himalay-NRHS/stitch-style"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 text-gray-600 hover:text-rose-500 transition-colors"
@@ -155,7 +150,7 @@ export default function GalleryPage({ params }: { params: { id: string } }) {
               </div>
             </div>
             <div className="mt-6 text-center text-gray-500 text-sm">
-              © {new Date().getFullYear()} Stitch & Style. All rights reserved.
+              © {new Date().getFullYear()} Stitch & Style.
             </div>
           </div>
         </footer>
