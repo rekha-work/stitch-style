@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Scissors } from "lucide-react";
 import { useInView } from "react-intersection-observer";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default function GalleryPage(props:any) {
-  const { params } = props
+  const { params } = props;
   const [allImageUrls, setAllImageUrls] = useState<string[]>([]);
   const [images, setImages] = useState<string[]>([]);
   const [page, setPage] = useState(1);
@@ -16,50 +16,55 @@ export default function GalleryPage(props:any) {
   const { ref, inView } = useInView({ threshold: 0.5, triggerOnce: false });
   const limit = 5;
 
+  // Fetch images on component mount
   useEffect(() => {
     const fetchAllImages = async () => {
       try {
         const category = params.id;
-        const res = await fetch(
-          `/api/gallery?category=${category}`,
-          { method: "GET", headers: { "Content-Type": "application/json" } }
-        );
+        const res = await fetch(`/api/gallery?category=${category}`);
         if (!res.ok) throw new Error("Failed to fetch images");
+
         const data = await res.json();
-        const urls: string[] = data.urls
-        setAllImageUrls(urls);
-        setImages(urls.slice(0, limit));
+        console.log("Fetched Images:", data.urls.length); // Debugging log
+
+        setAllImageUrls(data.urls);
+        setImages(data.urls.slice(0, limit));
         setPage(2);
-        if (urls.length <= limit) setAllLoaded(true);
+        if (data.urls.length <= limit) setAllLoaded(true);
       } catch (error) {
         console.error("Error fetching images:", error);
       }
     };
+
     fetchAllImages();
   }, [params.id]);
 
-  // Load more images when the user scrolls to the bottom
-  useEffect(() => {
-    if (inView && !loading && !allLoaded) {
-      loadMoreImages();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [inView, loading, allLoaded]);
-
-  const loadMoreImages = () => {
+  // Load more images function
+  const loadMoreImages = useCallback(() => {
     if (loading || allLoaded) return;
     setLoading(true);
-    const startIndex = (page - 1) * limit;
-    const endIndex = startIndex + limit;
-    const newImages = allImageUrls.slice(startIndex, endIndex);
-    if (newImages.length === 0) {
-      setAllLoaded(true);
-    } else {
-      setImages((prev) => [...prev, ...newImages]);
-      setPage((prev) => prev + 1);
+
+    setTimeout(() => {  // Ensure state updates properly
+      const startIndex = (page - 1) * limit;
+      const endIndex = startIndex + limit;
+      const newImages = allImageUrls.slice(startIndex, endIndex);
+
+      if (newImages.length === 0) {
+        setAllLoaded(true);
+      } else {
+        setImages((prev) => [...prev, ...newImages]);
+        setPage((prev) => prev + 1);
+      }
+      setLoading(false);
+    }, 100);
+  }, [loading, allLoaded, page, allImageUrls]);
+
+  // Trigger loadMoreImages when last image comes into view
+  useEffect(() => {
+    if (inView) {
+      loadMoreImages();
     }
-    setLoading(false);
-  };
+  }, [inView, loadMoreImages]);
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -78,7 +83,7 @@ export default function GalleryPage(props:any) {
           <p className="text-gray-600 mb-8">
             Browse through our exquisite designs and find your perfect style
           </p>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {images.map((imageUrl, index) => (
               <Link
@@ -87,22 +92,21 @@ export default function GalleryPage(props:any) {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="group"
+                ref={index === images.length - 1 ? ref : null}  // Attach observer to last image
               >
                 <div className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 transform group-hover:scale-[1.02]">
                   <div className="relative aspect-[3/4] overflow-hidden">
-                  <Image
-  src={imageUrl || "/placeholder.svg"}
-  alt={`Fashion design ${index + 1}`}
-  fill
-  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-  className="object-contain transition-transform duration-500 group-hover:scale-110"
-  priority={index < 2}
-/>
-
+                    <Image
+                      src={imageUrl || "/placeholder.svg"}
+                      alt={`Fashion design ${index + 1}`}
+                      fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      className="object-contain transition-transform duration-500 group-hover:scale-110"
+                      priority={index < 2}
+                    />
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
                   </div>
                   <div className="p-4">
-                   
                     <p className="text-gray-600 text-sm">Click to view full size</p>
                   </div>
                 </div>
@@ -115,8 +119,6 @@ export default function GalleryPage(props:any) {
               <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-rose-500"></div>
             </div>
           )}
-
-          {!allLoaded && <div ref={ref} className="h-10 my-4"></div>}
 
           {images.length === 0 && !loading && (
             <div className="text-center py-20">
