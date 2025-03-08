@@ -16,7 +16,6 @@ export default function GalleryPage(props:any) {
   const { ref, inView } = useInView({ threshold: 0.5, triggerOnce: false });
   const limit = 5;
 
-  // Fetch images on component mount
   useEffect(() => {
     const fetchAllImages = async () => {
       try {
@@ -25,7 +24,7 @@ export default function GalleryPage(props:any) {
         if (!res.ok) throw new Error("Failed to fetch images");
 
         const data = await res.json();
-        console.log("Fetched Images:", data.urls.length); // Debugging log
+        
 
         setAllImageUrls(data.urls);
         setImages(data.urls.slice(0, limit));
@@ -39,12 +38,11 @@ export default function GalleryPage(props:any) {
     fetchAllImages();
   }, [params.id]);
 
-  // Load more images function
   const loadMoreImages = useCallback(() => {
     if (loading || allLoaded) return;
     setLoading(true);
 
-    setTimeout(() => {  // Ensure state updates properly
+    setTimeout(() => {  
       const startIndex = (page - 1) * limit;
       const endIndex = startIndex + limit;
       const newImages = allImageUrls.slice(startIndex, endIndex);
@@ -59,7 +57,6 @@ export default function GalleryPage(props:any) {
     }, 100);
   }, [loading, allLoaded, page, allImageUrls]);
 
-  // Trigger loadMoreImages when last image comes into view
   useEffect(() => {
     if (inView) {
       loadMoreImages();
@@ -92,7 +89,7 @@ export default function GalleryPage(props:any) {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="group"
-                ref={index === images.length - 1 ? ref : null}  // Attach observer to last image
+                ref={index === images.length - 1 ? ref : null}  
               >
                 <div className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 transform group-hover:scale-[1.02]">
                   <div className="relative aspect-[3/4] overflow-hidden">

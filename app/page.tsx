@@ -45,7 +45,6 @@ export default function Home() {
               </div>
             </Link>
 
-            {/* Card 2 - Now the third card from original order */}
             <Link href="/macemb">
               <div className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow cursor-pointer">
                 <div className="relative h-80">
@@ -67,7 +66,6 @@ export default function Home() {
               </div>
             </Link>
 
-            {/* Card 3 - Now the first card from original order, moved to last */}
             <Link href="/stitched">
               <div className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow cursor-pointer">
                 <div className="relative h-80">

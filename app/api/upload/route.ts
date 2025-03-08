@@ -20,7 +20,6 @@ export async function POST(req: Request) {
         const bytes = await file.arrayBuffer();
         const buffer = Buffer.from(bytes);
 
-        // Upload file to Cloudinary
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const uploadResult: any = await new Promise((resolve, reject) => {
             cloudinary.uploader.upload_stream(
@@ -35,7 +34,6 @@ export async function POST(req: Request) {
         console.log(uploadResult);
         const uploaded_url = uploadResult.secure_url;
 
-        // Insert into the correct Prisma table
         let result;
         switch (category) {
             case "stitched":

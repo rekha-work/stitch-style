@@ -16,7 +16,7 @@ export async function GET(req: Request) {
         if (!allowedCategories.includes(category)) {
             return NextResponse.json({ error: "Invalid category" }, { status: 400 });
         }
-        //ts ignore used , because prisma thinks that the category is null or undefined , but we know that its a valid string and the tables exist in our database
+        //ts ignore used , because prisma thinks that the typeof(category)  is null or undefined , but we know that its a valid string and the tables exist in our database
 // @ts-expect-error: temporary workaround for type mismatch on this line
         const data = await prisma[category].findMany({
             select: {

@@ -88,7 +88,6 @@ export default function UploadPage() {
     }
   };
 
-  // Auto-dismiss the toast after 2 seconds
   useEffect(() => {
     if (toastMessage) {
       const timer = setTimeout(() => setToastMessage(null), 2000);
@@ -204,7 +203,6 @@ export default function UploadPage() {
         </div>
       </div>
 
-      {/* Toast Popup */}
       {toastMessage && (
         <div className="fixed top-4 right-4 z-50 bg-white border p-4 rounded shadow-lg">
           <p className="font-semibold">{toastMessage}</p>
