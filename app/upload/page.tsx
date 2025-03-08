@@ -1,84 +1,106 @@
-"use client"
+"use client";
 
-import type React from "react"
-
-import { useState, useRef } from "react"
-import Image from "next/image"
-import { Upload, X, ImagePlus, Loader2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Card, CardContent } from "@/components/ui/card"
+import React, { useState, useRef, useEffect } from "react";
+import Image from "next/image";
+import { Upload, X, ImagePlus, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent } from "@/components/ui/card";
 
 export default function UploadPage() {
-  const [files, setFiles] = useState<File[]>([])
-  const [previews, setPreviews] = useState<string[]>([])
-  const [isDragging, setIsDragging] = useState(false)
-  const [category, setCategory] = useState("")
-  const [isUploading, setIsUploading] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [category, setCategory] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
+  const [password, setPassword] = useState("");
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (selectedFiles: FileList | null) => {
-    if (!selectedFiles) return
+    if (!selectedFiles || selectedFiles.length === 0) return;
+    const newFile = selectedFiles[0];
+    if (!newFile.type.startsWith("image/")) return;
 
-    const newFiles = Array.from(selectedFiles).filter((file) => file.type.startsWith("image/"))
-    if (newFiles.length === 0) return
-
-    setFiles((prev) => [...prev, ...newFiles])
-
-    // Create previews for the new files
-    newFiles.forEach((file) => {
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        if (e.target?.result) {
-          setPreviews((prev) => [...prev, e.target!.result as string])
-        }
+    setFile(newFile);
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      if (e.target?.result) {
+        setPreview(e.target.result as string);
       }
-      reader.readAsDataURL(file)
-    })
-  }
+    };
+    reader.readAsDataURL(newFile);
+  };
 
   const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault()
-    setIsDragging(true)
-  }
+    e.preventDefault();
+    setIsDragging(true);
+  };
 
   const handleDragLeave = () => {
-    setIsDragging(false)
-  }
+    setIsDragging(false);
+  };
 
   const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault()
-    setIsDragging(false)
-    handleFileChange(e.dataTransfer.files)
-  }
+    e.preventDefault();
+    setIsDragging(false);
+    handleFileChange(e.dataTransfer.files);
+  };
 
-  const removeFile = (index: number) => {
-    setFiles(files.filter((_, i) => i !== index))
-    setPreviews(previews.filter((_, i) => i !== index))
-  }
+  const removeFile = () => {
+    setFile(null);
+    setPreview(null);
+  };
 
-  const handleUpload = () => {
-    if (files.length === 0 || !category) return
+  const handleUpload = async () => {
+    if (!file || !category || !password) return;
+    setIsUploading(true);
+    setToastMessage(null);
 
-    setIsUploading(true)
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("category", category);
+    formData.append("password", password);
 
-    // Simulate upload process
-    setTimeout(() => {
-      setIsUploading(false)
-      // Reset form after "upload"
-      setFiles([])
-      setPreviews([])
-      setCategory("")
-      // Here you would normally handle the actual HTTP request
-    }, 2000)
-  }
+    try {
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (res.status === 401) {
+        setToastMessage("Invalid Password");
+      } else if (res.status === 400 || res.status === 500) {
+        setToastMessage("Upload Failed");
+      } else if (res.ok) {
+        setToastMessage("Upload Successful!");
+        // Reset form
+        setFile(null);
+        setPreview(null);
+        setCategory("");
+        setPassword("");
+      }
+    } catch (error) {
+      setToastMessage("An error occurred");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  // Auto-dismiss the toast after 2 seconds
+  useEffect(() => {
+    if (toastMessage) {
+      const timer = setTimeout(() => setToastMessage(null), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [toastMessage]);
 
   return (
     <div className="container mx-auto py-10 px-4 max-w-4xl">
       <div className="space-y-6">
         <div className="space-y-2 text-center">
-          <h1 className="text-3xl font-bold tracking-tight">Upload Images</h1>
-          <p className="text-muted-foreground">Drag and drop your images or click to browse</p>
+          <h1 className="text-3xl font-bold tracking-tight">Upload Image</h1>
+          <p className="text-muted-foreground">Drag and drop your image or click to browse</p>
         </div>
 
         <Card>
@@ -98,7 +120,6 @@ export default function UploadPage() {
                 onChange={(e) => handleFileChange(e.target.files)}
                 className="hidden"
                 accept="image/*"
-                multiple
               />
               <div className="flex flex-col items-center justify-center space-y-4">
                 <div className="rounded-full bg-primary/10 p-4">
@@ -106,7 +127,7 @@ export default function UploadPage() {
                 </div>
                 <div className="space-y-2">
                   <p className="text-lg font-medium">
-                    {isDragging ? "Drop images here" : "Drag images here or click to browse"}
+                    {isDragging ? "Drop image here" : "Drag image here or click to browse"}
                   </p>
                   <p className="text-sm text-muted-foreground">Supported formats: JPEG, PNG, GIF, WebP</p>
                 </div>
@@ -115,31 +136,39 @@ export default function UploadPage() {
           </CardContent>
         </Card>
 
-        {previews.length > 0 && (
+        {preview && (
           <div className="space-y-4">
-            <h2 className="text-xl font-semibold">Selected Images ({previews.length})</h2>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {previews.map((preview, index) => (
-                <div key={index} className="relative group">
-                  <div className="relative aspect-square overflow-hidden rounded-lg border">
-                    <Image
-                      src={preview || "/placeholder.svg"}
-                      alt={`Preview ${index + 1}`}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                  <button
-                    onClick={() => removeFile(index)}
-                    className="absolute top-2 right-2 bg-black/70 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                </div>
-              ))}
+            <h2 className="text-xl font-semibold">Selected Image</h2>
+            <div className="relative group w-48 h-48 mx-auto">
+              <div className="relative aspect-square overflow-hidden rounded-lg border">
+                <Image src={preview || "/placeholder.svg"} alt="Preview" fill className="object-cover" />
+              </div>
+              <button
+                onClick={removeFile}
+                className="absolute top-2 right-2 bg-black/70 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                <X className="h-4 w-4" />
+              </button>
             </div>
           </div>
         )}
+
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <label htmlFor="password" className="text-sm font-medium">
+              Authentication Key
+            </label>
+            <input
+              type="password"
+              id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full rounded-md border px-3 py-2 text-sm"
+              placeholder="Enter your authentication key"
+            />
+            <p className="text-xs text-muted-foreground">This key will be verified in the backend</p>
+          </div>
+        </div>
 
         <div className="space-y-4">
           <div className="space-y-2">
@@ -151,19 +180,14 @@ export default function UploadPage() {
                 <SelectValue placeholder="Select a category" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="option1">Option 1</SelectItem>
-                <SelectItem value="option2">Option 2</SelectItem>
-                <SelectItem value="option3">Option 3</SelectItem>
+                <SelectItem value="stitched">Hand stitched</SelectItem>
+                <SelectItem value="handemb">Hand Embroidery</SelectItem>
+                <SelectItem value="macemb">Machine Embroidery</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
-          <Button
-            onClick={handleUpload}
-            disabled={files.length === 0 || !category || isUploading}
-            className="w-full"
-            size="lg"
-          >
+          <Button onClick={handleUpload} disabled={!file || !category || !password || isUploading} className="w-full" size="lg">
             {isUploading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -172,13 +196,19 @@ export default function UploadPage() {
             ) : (
               <>
                 <Upload className="mr-2 h-4 w-4" />
-                Upload {files.length} {files.length === 1 ? "Image" : "Images"}
+                Upload Image
               </>
             )}
           </Button>
         </div>
       </div>
-    </div>
-  )
-}
 
+      {/* Toast Popup */}
+      {toastMessage && (
+        <div className="fixed top-4 right-4 z-50 bg-white border p-4 rounded shadow-lg">
+          <p className="font-semibold">{toastMessage}</p>
+        </div>
+      )}
+    </div>
+  );
+}
