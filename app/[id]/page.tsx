@@ -119,7 +119,7 @@ export default function GalleryPage(props:any) {
 
           {images.length === 0 && !loading && (
             <div className="text-center py-20">
-              <p className="text-gray-500 text-lg">No images found</p>
+              <p className="text-gray-500 text-lg">Loading...!</p>
             </div>
           )}
         </section>
