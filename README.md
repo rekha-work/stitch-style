@@ -21,7 +21,7 @@ A client website built with Next.js for showcasing designs of three different cl
 
 1. Clone the repository
    ```
-   git clone <your-repo-url>
+   git clone https://github.com/Himalay-NRHS/stitch-style
    cd stitch-and-style
    ```
 
