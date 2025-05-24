@@ -55,7 +55,7 @@ export async function POST(req: Request) {
                 return NextResponse.json({ error: "Invalid category" }, { status: 400 });
         }
 
-        return NextResponse.json({ success: true, data: result });
+        return NextResponse.json({ success: true, data: result })
 
     } catch (error) {
         console.error("Upload error:", error);
