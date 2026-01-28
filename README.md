@@ -1,4 +1,4 @@
-# Stitch and Style
+# Stitch and Style.
 
 A client website built with Next.js for showcasing designs of three different clothing styles. Includes image upload functionality using Cloudinary.
 
